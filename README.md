@@ -131,9 +131,6 @@ Limitations: the data is simulated, so these numbers say nothing about real kitc
 6. Suggest the dish from the waste photo using image recognition.
 7. A group dashboard comparing outlets across several hotels.
 
-## Demo / Live Link
-- Live demo: [add link]
-- Demo video: [add link]
 
 ## License
 LGPL-3. See the module manifest. Team: Madhurima, Safva, Neha, Asna and Liya.
