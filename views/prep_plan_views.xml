@@ -1,0 +1,100 @@
+<odoo>
+    <record id="platewise_prep_plan_action" model="ir.actions.act_window">
+        <field name="name">Prep Planning</field>
+        <field name="res_model">platewise.prep.plan</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_upcoming': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Plan tomorrow's production</p>
+            <p>PlateWise suggests how much of each dish to prepare from the last 4 same-weekdays of real consumption.</p>
+        </field>
+    </record>
+
+    <!-- LIST VIEW -->
+    <record id="platewise_prep_plan_view_list" model="ir.ui.view">
+        <field name="name">platewise.prep.plan.list</field>
+        <field name="model">platewise.prep.plan</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" decoration-muted="state == 'done'">
+                <field name="date"/>
+                <field name="weekday" optional="show"/>
+                <field name="outlet_id"/>
+                <field name="dish_id"/>
+                <field name="planned_kg" readonly="state == 'done'"/>
+                <field name="suggested_kg" class="fw-bold text-primary"/>
+                <field name="potential_saving_aed" decoration-success="potential_saving_aed &gt; 0"/>
+                <button name="action_apply_suggestion" type="object" string="Apply" icon="fa-magic"
+                        invisible="state == 'done' or suggested_kg == 0 or planned_kg == suggested_kg"/>
+                <field name="produced_kg" optional="show"/>
+                <field name="wasted_kg" optional="show"/>
+                <field name="waste_pct" optional="show" decoration-danger="waste_pct &gt; 20"/>
+                <field name="state" widget="badge" decoration-info="state == 'planned'" decoration-success="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="platewise_prep_plan_view_form" model="ir.ui.view">
+        <field name="name">platewise.prep.plan.form</field>
+        <field name="model">platewise.prep.plan</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_apply_suggestion" type="object" string="Apply PlateWise Suggestion" class="btn-primary" invisible="state == 'done'"/>
+                    <button name="action_mark_done" type="object" string="Close Day" invisible="state == 'done'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_waste_logs" type="object" class="oe_stat_button" icon="fa-trash" string="Waste Logs"/>
+                    </div>
+                    <h1><field name="name"/></h1>
+                    <group>
+                        <group string="Plan">
+                            <field name="date" readonly="state == 'done'"/>
+                            <field name="weekday"/>
+                            <field name="outlet_id" readonly="state == 'done'"/>
+                            <field name="dish_id" readonly="state == 'done'"/>
+                            <field name="planned_kg" readonly="state == 'done'"/>
+                        </group>
+                        <group string="PlateWise Forecast">
+                            <field name="suggested_kg" class="fs-4 fw-bold text-primary"/>
+                            <field name="history_count"/>
+                            <field name="cost_per_kg"/>
+                            <field name="potential_saving_aed" class="fw-bold text-success"/>
+                        </group>
+                    </group>
+                    <group string="Actuals">
+                        <group>
+                            <field name="produced_kg"/>
+                            <field name="consumed_kg"/>
+                        </group>
+                        <group>
+                            <field name="wasted_kg"/>
+                            <field name="waste_pct"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="platewise_prep_plan_view_search" model="ir.ui.view">
+        <field name="name">platewise.prep.plan.search</field>
+        <field name="model">platewise.prep.plan</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="dish_id"/>
+                <field name="outlet_id"/>
+                <filter name="upcoming" string="Today &amp; Upcoming" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="past" string="History" domain="[('state', '=', 'done')]"/>
+                <group>
+                    <filter name="group_outlet" string="Outlet" context="{'group_by': 'outlet_id'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'date:day'}"/>
+                    <filter name="group_dish" string="Dish" context="{'group_by': 'dish_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

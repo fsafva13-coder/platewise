@@ -1,0 +1,215 @@
+<odoo>
+    <!-- ACTIONS -->
+    <record id="platewise_waste_log_action" model="ir.actions.act_window">
+        <field name="name">Waste Logs</field>
+        <field name="res_model">platewise.waste.log</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
+        <field name="context">{'search_default_this_month': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No food waste logged yet</p>
+            <p>Every kilogram logged becomes a cost in AED and a CO2e figure.</p>
+        </field>
+    </record>
+
+    <record id="platewise_waste_analysis_action" model="ir.actions.act_window">
+        <field name="name">Waste Analysis</field>
+        <field name="res_model">platewise.waste.log</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="context">{'search_default_confirmed': 1, 'search_default_group_reason': 1}</field>
+    </record>
+
+
+
+    <!-- LIST VIEW -->
+    <record id="platewise_waste_log_view_list" model="ir.ui.view">
+        <field name="name">platewise.waste.log.list</field>
+        <field name="model">platewise.waste.log</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'draft'" decoration-success="state == 'donated'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="shift" optional="show"/>
+                <field name="outlet_id"/>
+                <field name="dish_id"/>
+                <field name="category_id" optional="hide"/>
+                <field name="stage" optional="show"/>
+                <field name="reason"/>
+                <field name="quantity_kg" sum="Total kg"/>
+                <field name="cost_aed" sum="Total AED"/>
+                <field name="co2_kg" sum="Total CO2e" optional="show"/>
+                <field name="avoidable" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-success="state in ('confirmed', 'donated')"/>
+                <button name="action_confirm" type="object" string="Confirm" icon="fa-check" invisible="state != 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="platewise_waste_log_view_form" model="ir.ui.view">
+        <field name="name">platewise.waste.log.form</field>
+        <field name="model">platewise.waste.log</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" type="object" string="Confirm" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_donate" type="object" string="Redirect to Donation" invisible="state == 'donated' or reason != 'overproduction' or stage == 'plate'"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft" invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <h1><field name="name"/></h1>
+                    <group>
+                        <group>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="shift" widget="radio" options="{'horizontal': true}" readonly="state != 'draft'"/>
+                            <field name="outlet_id" readonly="state != 'draft'"/>
+                            <field name="dish_id" readonly="state != 'draft'"/>
+                            <field name="category_id"/>
+                            <field name="logged_by_id"/>
+                        </group>
+                        <group>
+                            <field name="stage" readonly="state != 'draft'"/>
+                            <field name="reason" readonly="state != 'draft'"/>
+                            <field name="quantity_kg" readonly="state != 'draft'"/>
+                            <field name="cost_aed" class="fw-bold text-danger"/>
+                            <field name="co2_kg"/>
+                            <field name="avoidable"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Photo &amp; Notes">
+                            <group>
+                                <field name="photo" widget="image" style="max-width:300px"/>
+                                <field name="note" placeholder="What happened? e.g. low covers after a cancelled group booking"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- QUICK "KIOSK" FORM: big, minimal, for kitchen tablets -->
+    <record id="platewise_waste_log_view_form_quick" model="ir.ui.view">
+        <field name="name">platewise.waste.log.form.quick</field>
+        <field name="model">platewise.waste.log</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <form>
+                <div class="fs-5">
+                    <group>
+                        <field name="outlet_id" options="{'no_create': True}"/>
+                        <field name="dish_id" options="{'no_create': True}"/>
+                        <field name="shift" widget="radio" options="{'horizontal': true}"/>
+                        <field name="stage" widget="radio" options="{'horizontal': true}"/>
+                        <field name="reason" widget="radio"/>
+                        <field name="quantity_kg" class="fs-3"/>
+                        <field name="cost_aed" class="fs-3 fw-bold text-danger"/>
+                        <field name="photo" widget="image" options="{'size': [120, 120]}"/>
+                    </group>
+                </div>
+                <footer>
+                    <button name="action_quick_save" type="object" string="Save &amp; Log Next" class="btn-primary"/>
+                    <button name="action_confirm" type="object" string="Save &amp; Close" class="btn-secondary"/>
+                    <button string="Cancel" special="cancel" class="btn-link"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- KANBAN VIEW -->
+    <record id="platewise_waste_log_view_kanban" model="ir.ui.view">
+        <field name="name">platewise.waste.log.kanban</field>
+        <field name="model">platewise.waste.log</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="reason">
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between">
+                            <field name="dish_id" class="fw-bold"/>
+                            <field name="cost_aed" class="text-danger fw-bold" widget="float" digits="[16,0]"/>
+                        </div>
+                        <div class="text-muted small">
+                            <field name="outlet_id"/> &#183; <field name="date"/> &#183; <field name="quantity_kg"/> kg
+                        </div>
+                        <footer>
+                            <field name="stage" class="small"/>
+                            <field name="state" widget="label_selection"
+                                   options="{'classes': {'draft': 'info', 'confirmed': 'success', 'donated': 'success'}}"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- PIVOT VIEW -->
+    <record id="platewise_waste_log_view_pivot" model="ir.ui.view">
+        <field name="name">platewise.waste.log.pivot</field>
+        <field name="model">platewise.waste.log</field>
+        <field name="arch" type="xml">
+            <pivot string="Waste Analysis" sample="1">
+                <field name="outlet_id" type="row"/>
+                <field name="reason" type="col"/>
+                <field name="cost_aed" type="measure"/>
+                <field name="quantity_kg" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- GRAPH VIEW -->
+    <record id="platewise_waste_log_view_graph" model="ir.ui.view">
+        <field name="name">platewise.waste.log.graph</field>
+        <field name="model">platewise.waste.log</field>
+        <field name="arch" type="xml">
+            <graph string="Cost of Food Waste" type="bar" stacked="1" sample="1">
+                <field name="outlet_id"/>
+                <field name="cost_aed" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="platewise_waste_log_view_search" model="ir.ui.view">
+        <field name="name">platewise.waste.log.search</field>
+        <field name="model">platewise.waste.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="dish_id"/>
+                <field name="outlet_id"/>
+                <field name="category_id"/>
+                <field name="logged_by_id"/>
+                <filter name="today" string="Today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="this_month" string="This Month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <filter name="date" string="Date" date="date"/>
+                <separator/>
+                <filter name="avoidable" string="Avoidable" domain="[('avoidable', '=', True)]"/>
+                <separator/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="confirmed" string="Confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter name="donated" string="Donated" domain="[('state', '=', 'donated')]"/>
+                <group>
+                    <filter name="group_outlet" string="Outlet" context="{'group_by': 'outlet_id'}"/>
+                    <filter name="group_dish" string="Dish" context="{'group_by': 'dish_id'}"/>
+                    <filter name="group_category" string="Food Category" context="{'group_by': 'category_id'}"/>
+                    <filter name="group_reason" string="Reason" context="{'group_by': 'reason'}"/>
+                    <filter name="group_stage" string="Stage" context="{'group_by': 'stage'}"/>
+                    <filter name="group_shift" string="Shift" context="{'group_by': 'shift'}"/>
+                    <filter name="group_weekday" string="Weekday" context="{'group_by': 'weekday'}"/>
+                    <filter name="group_date" string="Day" context="{'group_by': 'date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="platewise_waste_log_quick_action" model="ir.actions.act_window">
+        <field name="name">Log Waste</field>
+        <field name="res_model">platewise.waste.log</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="platewise_waste_log_view_form_quick"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

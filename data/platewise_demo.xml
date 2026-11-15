@@ -1,0 +1,3 @@
+<odoo>
+    <function model="platewise.prep.plan" name="action_generate_demo_data"/>
+</odoo>

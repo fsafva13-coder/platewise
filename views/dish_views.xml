@@ -1,0 +1,53 @@
+<odoo>
+    <record id="platewise_dish_action" model="ir.actions.act_window">
+        <field name="name">Dishes</field>
+        <field name="res_model">platewise.dish</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- LIST VIEW -->
+    <record id="platewise_dish_view_list" model="ir.ui.view">
+        <field name="name">platewise.dish.list</field>
+        <field name="model">platewise.dish</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="category_id"/>
+                <field name="cost_per_kg"/>
+                <field name="co2_factor" optional="show"/>
+                <field name="total_waste_kg" optional="show"/>
+                <field name="total_waste_cost" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="platewise_dish_view_form" model="ir.ui.view">
+        <field name="name">platewise.dish.form</field>
+        <field name="model">platewise.dish</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <h1><field name="name" placeholder="e.g. Lamb Ouzi"/></h1>
+                    <group>
+                        <group>
+                            <field name="category_id"/>
+                            <field name="product_id"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="cost_per_kg"/>
+                            <field name="co2_factor"/>
+                        </group>
+                    </group>
+                    <group string="Waste to date">
+                        <field name="total_waste_kg"/>
+                        <field name="total_waste_cost"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

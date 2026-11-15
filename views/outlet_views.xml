@@ -1,0 +1,147 @@
+<odoo>
+    <!-- DASHBOARD ACTION (kanban of outlets) -->
+    <record id="platewise_outlet_dashboard_action" model="ir.actions.act_window">
+        <field name="name">Waste Dashboard</field>
+        <field name="res_model">platewise.outlet</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add your first kitchen outlet</p>
+            <p>Or use Configuration &gt; Generate Sample Hotel Data to explore PlateWise with 4 weeks of realistic data.</p>
+        </field>
+    </record>
+
+    <record id="platewise_outlet_action" model="ir.actions.act_window">
+        <field name="name">Outlets</field>
+        <field name="res_model">platewise.outlet</field>
+        <field name="view_mode">list,form,kanban</field>
+    </record>
+
+    <!-- KANBAN VIEW (dashboard cards) -->
+    <record id="platewise_outlet_view_kanban" model="ir.ui.view">
+        <field name="name">platewise.outlet.kanban</field>
+        <field name="model">platewise.outlet</field>
+        <field name="arch" type="xml">
+            <kanban create="false" class="o_kanban_dashboard">
+                <field name="budget_status"/>
+                <field name="month_cost_aed"/>
+                <field name="month_waste_kg"/>
+                <field name="month_co2_kg"/>
+                <field name="month_meals"/>
+                <field name="month_avoidable_pct"/>
+                <field name="today_cost_aed"/>
+                <field name="daily_budget_aed"/>
+                <templates>
+                    <t t-name="card" class="p-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <field name="name" class="fs-4 fw-bold"/>
+                                <div class="text-muted"><field name="outlet_type"/></div>
+                            </div>
+                            <span t-if="record.budget_status.raw_value == 'ok'" class="badge text-bg-success">Within budget</span>
+                            <span t-if="record.budget_status.raw_value == 'warning'" class="badge text-bg-warning">Near budget</span>
+                            <span t-if="record.budget_status.raw_value == 'over'" class="badge text-bg-danger">Over budget</span>
+                        </div>
+                        <div class="row g-2 mt-3 text-center">
+                            <div class="col-6">
+                                <div class="fs-3 fw-bold text-danger text-nowrap">AED <t t-out="Math.round(record.month_cost_aed.raw_value).toLocaleString()"/></div>
+                                <div class="small text-muted">lost this month</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="fs-3 fw-bold text-nowrap"><t t-out="Math.round(record.month_waste_kg.raw_value).toLocaleString()"/> kg</div>
+                                <div class="small text-muted">food wasted</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="fs-5 fw-bold text-success text-nowrap"><t t-out="Math.round(record.month_co2_kg.raw_value).toLocaleString()"/> kg</div>
+                                <div class="small text-muted">CO2e emitted</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="fs-5 fw-bold"><t t-out="record.month_meals.raw_value.toLocaleString()"/></div>
+                                <div class="small text-muted">meals equivalent</div>
+                            </div>
+                        </div>
+                        <div class="mt-3 small text-muted">
+                            <t t-out="Math.round(record.month_avoidable_pct.raw_value)"/>% avoidable &#183;
+                            today AED <t t-out="Math.round(record.today_cost_aed.raw_value)"/> of <t t-out="Math.round(record.daily_budget_aed.raw_value)"/> budget
+                        </div>
+                        <div class="d-flex gap-2 mt-3">
+                            <button name="action_log_waste" type="object" class="btn btn-primary btn-sm">Log Waste</button>
+                            <button name="action_view_waste_logs" type="object" class="btn btn-secondary btn-sm">View Logs</button>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- LIST VIEW -->
+    <record id="platewise_outlet_view_list" model="ir.ui.view">
+        <field name="name">platewise.outlet.list</field>
+        <field name="model">platewise.outlet</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="outlet_type"/>
+                <field name="manager_id" widget="many2one_avatar_user"/>
+                <field name="daily_budget_aed"/>
+                <field name="month_cost_aed"/>
+                <field name="month_co2_kg"/>
+                <field name="budget_status" widget="badge"
+                       decoration-success="budget_status == 'ok'"
+                       decoration-warning="budget_status == 'warning'"
+                       decoration-danger="budget_status == 'over'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="platewise_outlet_view_form" model="ir.ui.view">
+        <field name="name">platewise.outlet.form</field>
+        <field name="model">platewise.outlet</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_log_waste" type="object" string="Log Waste" class="btn-primary"/>
+                    <button name="%(platewise.action_report_outlet_impact)d" type="action" string="Impact Report"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_waste_logs" type="object" class="oe_stat_button" icon="fa-trash">
+                            <field name="waste_log_count" widget="statinfo" string="Waste Logs"/>
+                        </button>
+                    </div>
+                    <h1><field name="name" placeholder="e.g. Saffron Buffet"/></h1>
+                    <group>
+                        <group>
+                            <field name="outlet_type"/>
+                            <field name="manager_id" widget="many2one_avatar_user"/>
+                        </group>
+                        <group>
+                            <field name="daily_budget_aed"/>
+                            <field name="budget_status" widget="badge"
+                                   decoration-success="budget_status == 'ok'"
+                                   decoration-warning="budget_status == 'warning'"
+                                   decoration-danger="budget_status == 'over'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="This Month">
+                            <group>
+                                <group>
+                                    <field name="month_cost_aed"/>
+                                    <field name="month_waste_kg"/>
+                                    <field name="today_cost_aed"/>
+                                </group>
+                                <group>
+                                    <field name="month_co2_kg"/>
+                                    <field name="month_meals"/>
+                                    <field name="month_avoidable_pct"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_platewise_food_category,access_platewise_food_category,model_platewise_food_category,base.group_user,1,1,1,1
+access_platewise_dish,access_platewise_dish,model_platewise_dish,base.group_user,1,1,1,1
+access_platewise_outlet,access_platewise_outlet,model_platewise_outlet,base.group_user,1,1,1,1
+access_platewise_waste_log,access_platewise_waste_log,model_platewise_waste_log,base.group_user,1,1,1,1
+access_platewise_prep_plan,access_platewise_prep_plan,model_platewise_prep_plan,base.group_user,1,1,1,1

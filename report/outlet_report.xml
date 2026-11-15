@@ -1,0 +1,73 @@
+<odoo>
+    <record id="action_report_outlet_impact" model="ir.actions.report">
+        <field name="name">Food Waste Impact Report</field>
+        <field name="model">platewise.outlet</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">platewise.report_outlet_impact</field>
+        <field name="report_file">platewise.report_outlet_impact</field>
+        <field name="print_report_name">'Waste Impact - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_platewise_outlet"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_outlet_impact">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <t t-set="data" t-value="o._get_report_data()"/>
+                    <div class="page">
+                        <h2>Food Waste Impact Report</h2>
+                        <p class="text-muted"><span t-field="o.name"/> &#183; <span t-esc="data['period']"/></p>
+
+                        <table class="table table-sm table-bordered text-center mt-4">
+                            <thead>
+                                <tr>
+                                    <th>Cost of waste</th><th>Food wasted</th><th>CO2e</th><th>Meals equivalent</th><th>Avoidable</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>AED <span t-esc="'{:,.0f}'.format(o.month_cost_aed)"/></strong></td>
+                                    <td><span t-esc="'{:,.1f}'.format(o.month_waste_kg)"/> kg</td>
+                                    <td><span t-esc="'{:,.0f}'.format(o.month_co2_kg)"/> kg</td>
+                                    <td><span t-esc="'{:,}'.format(o.month_meals)"/></td>
+                                    <td><span t-esc="'{:,.0f}'.format(o.month_avoidable_pct)"/>%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h4 class="mt-4">Where the waste comes from</h4>
+                        <table class="table table-sm">
+                            <thead><tr><th>Reason</th><th class="text-end">kg</th><th class="text-end">AED</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="data['by_reason']" t-as="row">
+                                    <td><span t-esc="row['label']"/></td>
+                                    <td class="text-end"><span t-esc="'{:,.1f}'.format(row['kg'])"/></td>
+                                    <td class="text-end"><span t-esc="'{:,.0f}'.format(row['cost'])"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h4 class="mt-4">Top 5 most costly dishes</h4>
+                        <table class="table table-sm">
+                            <thead><tr><th>Dish</th><th class="text-end">kg</th><th class="text-end">AED</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="data['top_dishes']" t-as="row">
+                                    <td><span t-esc="row['label']"/></td>
+                                    <td class="text-end"><span t-esc="'{:,.1f}'.format(row['kg'])"/></td>
+                                    <td class="text-end"><span t-esc="'{:,.0f}'.format(row['cost'])"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="alert alert-success mt-4">
+                            Halving avoidable waste, in line with the UAE's Ne'ma 2030 food-loss target, would save this outlet about
+                            <strong>AED <span t-esc="'{:,.0f}'.format(data['saving_if_halved'])"/></strong> per month.
+                        </div>
+                        <p class="small text-muted">CO2e values use indicative lifecycle factors per food category. Meals equivalent assumes 0.5 kg per meal.</p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

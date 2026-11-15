@@ -1,0 +1,26 @@
+<odoo>
+    <menuitem id="platewise_menu_root" name="PlateWise" web_icon="platewise,static/description/icon.png" sequence="10">
+        <!-- MENUITEM 1 -->
+        <menuitem id="platewise_dashboard_menu" name="Dashboard" action="platewise_outlet_dashboard_action" sequence="1"/>
+
+        <!-- MENUITEM 2 -->
+        <menuitem id="platewise_waste_first_level_menu" name="Waste" sequence="2">
+            <menuitem id="platewise_waste_quick_menu" name="Log Waste" action="platewise_waste_log_quick_action" sequence="1"/>
+            <menuitem id="platewise_waste_log_menu" name="Waste Logs" action="platewise_waste_log_action" sequence="2"/>
+        </menuitem>
+
+        <!-- MENUITEM 3 -->
+        <menuitem id="platewise_prep_menu" name="Prep Planning" action="platewise_prep_plan_action" sequence="3"/>
+
+        <!-- MENUITEM 4 -->
+        <menuitem id="platewise_analysis_menu" name="Analytics" action="platewise_waste_analysis_action" sequence="4"/>
+
+        <!-- MENUITEM 5 -->
+        <menuitem id="platewise_config_menu" name="Configuration" sequence="99">
+            <menuitem id="platewise_outlet_menu" action="platewise_outlet_action" sequence="1"/>
+            <menuitem id="platewise_dish_menu" action="platewise_dish_action" sequence="2"/>
+            <menuitem id="platewise_category_menu" action="platewise_food_category_action" sequence="3"/>
+            <menuitem id="platewise_demo_menu" action="action_platewise_generate_demo" sequence="10"/>
+        </menuitem>
+    </menuitem>
+</odoo>

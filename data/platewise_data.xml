@@ -1,0 +1,71 @@
+<odoo>
+    <!-- Food categories with indicative lifecycle CO2e factors (kg CO2e per kg of food wasted) -->
+    <data noupdate="1">
+        <record id="category_red_meat" model="platewise.food.category">
+            <field name="name">Red Meat</field>
+            <field name="co2_factor">27.0</field>
+            <field name="color">1</field>
+        </record>
+        <record id="category_poultry" model="platewise.food.category">
+            <field name="name">Poultry</field>
+            <field name="co2_factor">6.9</field>
+            <field name="color">2</field>
+        </record>
+        <record id="category_seafood" model="platewise.food.category">
+            <field name="name">Seafood</field>
+            <field name="co2_factor">6.1</field>
+            <field name="color">4</field>
+        </record>
+        <record id="category_dairy" model="platewise.food.category">
+            <field name="name">Dairy &amp; Cheese</field>
+            <field name="co2_factor">8.5</field>
+            <field name="color">3</field>
+        </record>
+        <record id="category_rice_grains" model="platewise.food.category">
+            <field name="name">Rice &amp; Grains</field>
+            <field name="co2_factor">2.7</field>
+            <field name="color">5</field>
+        </record>
+        <record id="category_bakery" model="platewise.food.category">
+            <field name="name">Bakery</field>
+            <field name="co2_factor">1.6</field>
+            <field name="color">6</field>
+        </record>
+        <record id="category_fruit_veg" model="platewise.food.category">
+            <field name="name">Fruit &amp; Vegetables</field>
+            <field name="co2_factor">0.9</field>
+            <field name="color">10</field>
+        </record>
+        <record id="category_desserts" model="platewise.food.category">
+            <field name="name">Desserts</field>
+            <field name="co2_factor">2.5</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="seq_platewise_waste_log" model="ir.sequence">
+            <field name="name">PlateWise Waste Log</field>
+            <field name="code">platewise.waste.log</field>
+            <field name="prefix">WL/%(year)s/</field>
+            <field name="padding">4</field>
+        </record>
+
+        <!-- SCHEDULED ACTION: daily waste budget check -->
+        <record id="ir_cron_platewise_budget_check" model="ir.cron">
+            <field name="name">PlateWise: Daily Waste Budget Check</field>
+            <field name="model_id" ref="model_platewise_outlet"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_check_waste_budget()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+
+    <!-- SERVER ACTION: one-click sample data for demos -->
+    <record id="action_platewise_generate_demo" model="ir.actions.server">
+        <field name="name">Generate Sample Hotel Data</field>
+        <field name="model_id" ref="model_platewise_prep_plan"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_generate_demo_data()</field>
+    </record>
+</odoo>
